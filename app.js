@@ -1,7 +1,10 @@
+//db.adminCommand({ setFeatureCompatibilityVersion: "3.6" })
 var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+var Campground = require("./models/campground");
+var seedDB = require("./seeds");
 
 mongoose.connect("mongodb://localhost/sqeak_camp", {
 	useMongoClient: true
@@ -11,29 +14,11 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
 
+seedDB();
+
 app.get("/", function(req, res) {
 	res.render("landing");
 });
-
-var campGroundSchema = new mongoose.Schema({
-	name: String,
-	image: String,
-	description: String
-});
-
-var Campground = mongoose.model("Campground", campGroundSchema);
-// Campground.create(
-// 	{ name: "Random Place", image: "https://farm7.staticflickr.com/6014/6015893151_044a2af184.jpg" },
-// 	function(err, campground){
-// 		if (err) {
-// 			console.log(err);
-// 		} else {
-// 			console.log("NEWLY CREATED CAMPGROUND: ");
-// 			console.log(campground);
-// 		}
-// 	}
-// );
-
 
 app.get("/campgrounds", function(req, res) {
 	Campground.find({}, function(err, allCampgrounds) {
@@ -65,10 +50,11 @@ app.get("/campgrounds/new", function(req, res) {
 });
 
 app.get('/campgrounds/:id', function(req, res) {
-	Campground.findById(req.params.id, function(err, foundCampground) {
+	Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground) {
 		if (err) {
 			console.log(err);
 		} else {
+			console.log(foundCampground);
 			res.render("show", {campground: foundCampground});
 		}
 	});
