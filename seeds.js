@@ -45,7 +45,7 @@ function seedDB() {
 								if (err) {
 									console.log(err);
 								} else {
-									console.log(d);
+									console.log("Comment pushed in");
 								}
 							});
 							console.log("Created new comment");
