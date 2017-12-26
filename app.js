@@ -6,6 +6,9 @@ var mongoose = require("mongoose");
 var Campground = require("./models/campground");
 var Comment = require("./models/comment");
 var seedDB = require("./seeds");
+var passport = require("passport");
+var localPass = require("passport-local");
+var User = require("./models/user");
 
 mongoose.connect("mongodb://localhost/sqeak_camp", {
 	useMongoClient: true
@@ -17,6 +20,17 @@ app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 
 seedDB();
+
+app.use(require("express-session")({
+	secret: "Kuttar Bachcha is a stupid bitch!",
+	resave: false,
+	saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localPass(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.get("/", function(req, res) {
 	res.render("landing");
@@ -89,6 +103,23 @@ app.post("/campgrounds/:id/comments", function(req, res) {
 				}
 			});
 		}
+	});
+});
+
+app.get("/register", function(req, res) {
+	res.render("register");
+});
+
+app.post("/register", function(req, res) {
+	var newUser = new User({username: req.body.username});
+	User.register(newUser, req.body.password, function(err, user) {
+		if (err) {
+			console.log(err);
+			return res.render("register");
+		}
+		passport.authenticate("local")(req, res, function() {
+			res.redirect("/campgrounds");
+		});
 	});
 });
 
