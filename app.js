@@ -24,7 +24,7 @@ app.use(methodOverride("_method"));
 
 app.set("view engine", "ejs");
 
-seedDB();
+//seedDB();
 
 app.use(require("express-session")({
 	secret: "Kuttar Bachcha is a stupid bitch!",
