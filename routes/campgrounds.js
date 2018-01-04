@@ -40,8 +40,9 @@ router.get("/new", middlewareObj.isLoggedIn, function(req, res) {
 
 router.get('/:id', function(req, res) {
 	Campground.findById(req.params.id).populate("comments").exec(function(err, foundCampground) {
-		if (err) {
-			console.log(err);
+		if (err || !foundCampground) {
+			req.flash("error", "Item not found!");
+			res.redirect("/campgrounds");
 		} else {
 			console.log(foundCampground);
 			res.render("campgrounds/show", {campground: foundCampground});
@@ -58,6 +59,7 @@ router.get("/:id/edit", middlewareObj.checkCampgroundOwnership, function(req, re
 router.put("/:id", middlewareObj.checkCampgroundOwnership, function(req, res) {
 	Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground) {
 		if (err) {
+			req.flash("error", "Couldn't update the item!");
 			res.redirect("/campgrounds");
 		} else {
 			res.redirect("/campgrounds/" + req.params.id);
@@ -68,6 +70,7 @@ router.put("/:id", middlewareObj.checkCampgroundOwnership, function(req, res) {
 router.delete("/:id", middlewareObj.checkCampgroundOwnership, function(req, res) {
 	Campground.findByIdAndRemove(req.params.id, function(err) {
 		if (err) {
+			req.flash("error", "Couldn't remove the item!");
 			res.redirect("/campgrounds");
 		} else {
 			res.redirect("/campgrounds");
