@@ -27,6 +27,7 @@ app.use(flash());
 app.set("view engine", "ejs");
 
 //seedDB();
+app.locals.moment = require('moment');
 
 app.use(require("express-session")({
 	secret: "Kuttar Bachcha is a stupid bitch!",
