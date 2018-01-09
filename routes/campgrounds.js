@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 var Campground = require("../models/campground");
 var middlewareObj = require("../middleware");
+var geocoder = require('geocoder');
 
 
 router.get("/", function(req, res) {
@@ -24,14 +25,21 @@ router.post("/", middlewareObj.isLoggedIn, function(req, res) {
 		id: req.user._id,
 		username: req.user.username
 	};
-	var newCampground = { name: name, image: image, description: desc, author: author, price: price };
 
-	Campground.create(newCampground, function(err, newlyCreated) {
-		if (err) {
-			console.log(err);
-		} else {
-			res.redirect("/campgrounds");
-		}
+	geocoder.geocode(req.body.location, function(err, data) {
+		var lat = data.results[0].geometry.location.lat;
+	    var lng = data.results[0].geometry.location.lng;
+	    var location = data.results[0].formatted_address;
+	    var newCampground = { name: name, image: image, description: desc, author: author, price: price, location: location, lat: lat, lng: lng };
+	    Campground.create(newCampground, function(err, newlyCreated) {
+			if (err) {
+				console.log(err);
+				req.flash("error", "Could not create resort!");
+				res.redirect("/campgrounds");
+			} else {
+				res.redirect("/campgrounds");
+			}
+		});	
 	});	
 });
 
@@ -58,14 +66,21 @@ router.get("/:id/edit", middlewareObj.checkCampgroundOwnership, function(req, re
 });
 
 router.put("/:id", middlewareObj.checkCampgroundOwnership, function(req, res) {
-	Campground.findByIdAndUpdate(req.params.id, req.body.campground, function(err, updatedCampground) {
-		if (err) {
-			req.flash("error", "Couldn't update the item!");
-			res.redirect("/campgrounds");
-		} else {
-			res.redirect("/campgrounds/" + req.params.id);
-		}
-	});
+	geocoder.geocode(req.body.location, function (err, data) {
+    var lat = data.results[0].geometry.location.lat;
+    var lng = data.results[0].geometry.location.lng;
+    var location = data.results[0].formatted_address;
+    var newData = {name: req.body.name, image: req.body.image, description: req.body.description, price: req.body.price, location: location, lat: lat, lng: lng};
+    Campground.findByIdAndUpdate(req.params.id, {$set: newData}, function(err, campground){
+        if(err){
+            req.flash("error", err.message);
+            res.redirect("back");
+        } else {
+            req.flash("success","Successfully Updated!");
+            res.redirect("/campgrounds/" + campground._id);
+        }
+    });
+  });
 });
 
 router.delete("/:id", middlewareObj.checkCampgroundOwnership, function(req, res) {
