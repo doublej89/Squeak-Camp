@@ -2,6 +2,9 @@ var express = require("express");
 var router = express.Router();
 var User = require("../models/user");
 var passport = require("passport");
+var async = require("async");
+var nodemailer = require("nodemailer");
+var crypto = require("crypto");
 
 router.get("/", function(req, res) {
 	res.render("landing");
@@ -17,6 +20,9 @@ router.get("/login", function(req, res) {
 
 router.post("/register", function(req, res) {
 	var newUser = new User({username: req.body.username});
+	if(req.body.adminCode === 'secretcode') {
+      newUser.isAdmin = true;
+    }
 	User.register(newUser, req.body.password, function(err, user) {
 		if (err) {
 			console.log(err);
@@ -24,7 +30,7 @@ router.post("/register", function(req, res) {
             return res.redirect('/register');
 		}
 		passport.authenticate("local")(req, res, function() {
-			req.flash("success", "Successfully Signed Up! Nice to meet you " + user.username);
+			req.flash("success", "Successfully Signed Up! Welcome to the club " + user.username);
 			res.redirect("/campgrounds");
 		});
 	});
@@ -41,6 +47,10 @@ router.get("/logout", function(req, res) {
 	req.logout();
 	req.flash("success", "Logged you out!");
 	res.redirect("/campgrounds");
+});
+
+router.get('/forgot', function(req, res) {
+	res.render("forgot");
 });
 
 function isLoggedIn(req, res, next) {
