@@ -3,7 +3,26 @@ var router = express.Router();
 var Campground = require("../models/campground");
 var middlewareObj = require("../middleware");
 var geocoder = require('geocoder');
+var multer = require("multer");
+var storage = multer.diskStorage({
+	filename: function(req, file, callback) {
+		callback(null, Date.now() + file.originalname);
+	}
+});
+var imageFilter = function(req, file, cb) {
+	if (file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+		return cb(new Error('only image files are allowed'), false);
+	}
+	cb(null, true);
+};
+var upload = multer({storage: storage, fileFilter: imageFilter});
 
+var cloudinary = require("cloudinary");
+cloudinary.config({
+	cloud_name: 'dzube23xx',
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 router.get("/", function(req, res) {
 	Campground.find({}, function(err, allCampgrounds) {
@@ -16,31 +35,32 @@ router.get("/", function(req, res) {
 	});	
 });
 
-router.post("/", middlewareObj.isLoggedIn, function(req, res) {
-	var name = req.body.name;
-	var image = req.body.image;
-	var desc = req.body.description;
-	var price = req.body.price;
-	var author = {
-		id: req.user._id,
-		username: req.user.username
-	};
-
+router.post("/", middlewareObj.isLoggedIn, upload.single('image'), function(req, res) {
 	geocoder.geocode(req.body.location, function(err, data) {
 		var lat = data.results[0].geometry.location.lat;
 	    var lng = data.results[0].geometry.location.lng;
 	    var location = data.results[0].formatted_address;
 	    var newCampground = { name: name, image: image, description: desc, author: author, price: price, location: location, lat: lat, lng: lng };
-	    Campground.create(newCampground, function(err, newlyCreated) {
-			if (err) {
-				console.log(err);
-				req.flash("error", "Could not create resort!");
-				res.redirect("/campgrounds");
-			} else {
-				res.redirect("/campgrounds");
-			}
-		});	
-	});	
+	    cloudinary.uploader.upload(req.file.path, function(result) {
+			var name = req.body.name;
+			var image = result.secure_url;
+			var desc = req.body.description;
+			var price = req.body.price;
+			var author = {
+				id: req.user._id,
+				username: req.user.username
+			};
+			Campground.create(newCampground, function(err, newlyCreated) {
+				if (err) {
+					console.log(err);
+					req.flash("error", "Could not create resort!");
+					res.redirect("back");
+				} else {
+					res.redirect("/campgrounds/" + newlyCreated.id);
+				}
+			});
+		});		   	
+	});		
 });
 
 router.get("/new", middlewareObj.isLoggedIn, function(req, res) {
