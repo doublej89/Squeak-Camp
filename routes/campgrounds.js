@@ -25,14 +25,26 @@ cloudinary.config({
 });
 
 router.get("/", function(req, res) {
-	Campground.find({}, function(err, allCampgrounds) {
-		if (err) {
-			console.log(err);
-		} else{
-			console.log(req.user);
-			res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user});
-		}
-	});	
+	if (req.query.search) {
+		const regx = new RegExp(escapeRegex(req.query.search), 'gi');
+		Campground.find({name: regx}, function(err, allCampgrounds) {
+			if (err) {
+				console.log(err);
+			} else{
+				console.log(req.user);
+				res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user});
+			}
+		});
+	} else {
+		Campground.find({}, function(err, allCampgrounds) {
+			if (err) {
+				console.log(err);
+			} else{
+				console.log(req.user);
+				res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user});
+			}
+		});	
+	}	
 });
 
 router.post("/", middlewareObj.isLoggedIn, upload.single('image'), function(req, res) {
@@ -113,5 +125,9 @@ router.delete("/:id", middlewareObj.checkCampgroundOwnership, function(req, res)
 		}
 	});
 });
+
+function escapeRegex(text) {
+	return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
 
 module.exports = router;
