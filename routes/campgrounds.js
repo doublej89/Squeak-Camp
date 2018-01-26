@@ -10,7 +10,7 @@ var storage = multer.diskStorage({
 	}
 });
 var imageFilter = function(req, file, cb) {
-	if (file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+	if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
 		return cb(new Error('only image files are allowed'), false);
 	}
 	cb(null, true);
@@ -25,14 +25,18 @@ cloudinary.config({
 });
 
 router.get("/", function(req, res) {
+	var noMatch = '';
 	if (req.query.search) {
 		const regx = new RegExp(escapeRegex(req.query.search), 'gi');
 		Campground.find({name: regx}, function(err, allCampgrounds) {
 			if (err) {
 				console.log(err);
 			} else{
-				console.log(req.user);
-				res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user});
+				
+				if (allCampgrounds.length < 1) {
+					noMatch = "Nothing matches that qquery, please try again!"
+				}
+				res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user, noMatch: noMatch});
 			}
 		});
 	} else {
@@ -41,7 +45,7 @@ router.get("/", function(req, res) {
 				console.log(err);
 			} else{
 				console.log(req.user);
-				res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user});
+				res.render("campgrounds/index", {campgrounds: allCampgrounds, currentUser: req.user, noMatch: noMatch});
 			}
 		});	
 	}	
@@ -52,7 +56,7 @@ router.post("/", middlewareObj.isLoggedIn, upload.single('image'), function(req,
 		var lat = data.results[0].geometry.location.lat;
 	    var lng = data.results[0].geometry.location.lng;
 	    var location = data.results[0].formatted_address;
-	    var newCampground = { name: name, image: image, description: desc, author: author, price: price, location: location, lat: lat, lng: lng };
+	    
 	    cloudinary.uploader.upload(req.file.path, function(result) {
 			var name = req.body.name;
 			var image = result.secure_url;
@@ -62,6 +66,7 @@ router.post("/", middlewareObj.isLoggedIn, upload.single('image'), function(req,
 				id: req.user._id,
 				username: req.user.username
 			};
+			var newCampground = { name: name, image: image, description: desc, author: author, price: price, location: location, lat: lat, lng: lng };
 			Campground.create(newCampground, function(err, newlyCreated) {
 				if (err) {
 					console.log(err);
