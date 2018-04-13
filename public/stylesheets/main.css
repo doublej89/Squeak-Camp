@@ -19,3 +19,70 @@
     height: 400px;
     width: 100%;
 }
+
+.footer {
+	width: 100%;
+	bottom: 0;
+	position: absolute;
+	background-color: #223843;
+	height: 60px;
+}
+
+.text-muted {
+	margin: 20px 0;
+}
+
+.hero {
+    background-image: url(../images/ken-cheung-250959-unsplash.jpg);
+    background-size: cover;
+    background-position: center;
+    height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+	width: 100vw;
+	position: relative;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+}
+
+.hero h1 {
+	font-size: 4em;
+	font-weight: 700;
+	color: white;
+	margin: 0;
+	text-shadow: 2px 2px 4px #000000;
+}
+
+.hero p {
+	color: white;
+}
+
+.hero .container p:nth-child(2) {
+	font-size: 1.5em;
+	margin: 10px 0 30px;
+	text-shadow: 2px 2px 4px #000000;
+}
+
+.navbar {
+	margin-bottom: 0;
+}
+
+/*
+ @media (min-width: 992px) {
+	.hero {
+		margin-left: calc(-100vw / 2 + 1000px / 2);
+    	margin-right: calc(-100vw / 2 + 1000px / 2);
+	}
+}
+
+@media (min-width: 768px) {
+	.hero {
+		margin-left: calc(-100vw / 2 + 780px / 2);
+    	margin-right: calc(-100vw / 2 + 780px / 2);
+	}
+}
+*/
+

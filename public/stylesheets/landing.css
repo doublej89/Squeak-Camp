@@ -40,26 +40,26 @@ body {
 }
 
 .slideshow li:nth-child(1) {
-	background-image: url(../images/fineas-anton-136459.jpg);
+	background-image: url(../images/joseph-barrientos-93568-unsplash-min.jpg);
 }
 
 .slideshow li:nth-child(2) {
-	background-image: url(../images/jonatan-pie-216311.jpg);
+	background-image: url(../images/nik-macmillan-226092-unsplash-min.jpg);
 	animation-delay: 10s;
 }
 
 .slideshow li:nth-child(3) {
-	background-image: url(../images/jonatan-pie-234237.jpg);
+	background-image: url(../images/teddy-kelley-71908-unsplash-min.jpg);
 	animation-delay: 20s;
 }
 
 .slideshow li:nth-child(4) {
-	background-image: url(../images/milada-vigerova-35578.jpg);
+	background-image: url(../images/sophie-higginbottom-133982-unsplash-min.jpg);
 	animation-delay: 30s;
 }
 
 .slideshow li:nth-child(5) {
-	background-image: url(../images/samuel-ferrara-136526.jpg);
+	background-image: url(../images/vashishtha-jogi-57634-unsplash-min.jpg);
 	animation-delay: 40s;
 }
 
