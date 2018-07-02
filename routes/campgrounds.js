@@ -86,6 +86,7 @@ router.post("/", middlewareObj.isLoggedIn, upload.single("image"), function(
     var location = data.results[0].formatted_address;
 
     cloudinary.uploader.upload(req.file.path, function(result) {
+      console.log(req.file.path);
       var name = req.body.name;
       var image = result.secure_url;
       var desc = req.body.description;
@@ -106,7 +107,6 @@ router.post("/", middlewareObj.isLoggedIn, upload.single("image"), function(
       };
       Campground.create(newCampground, function(err, newlyCreated) {
         if (err) {
-          console.log(err);
           req.flash("error", "Could not create resort!");
           res.redirect("back");
         } else {
@@ -129,7 +129,6 @@ router.get("/:id", function(req, res) {
         req.flash("error", "Item not found!");
         res.redirect("/campgrounds");
       } else {
-        console.log(foundCampground);
         res.render("campgrounds/show", { campground: foundCampground });
       }
     });
@@ -145,7 +144,7 @@ router.get("/:id/edit", middlewareObj.checkCampgroundOwnership, function(
 });
 
 router.put(
-  "/:id/edit",
+  "/:id",
   middlewareObj.checkCampgroundOwnership,
   upload.single("image"),
   function(req, res) {
